@@ -2,5 +2,5 @@
     "clientId": "CLIENT_ID",
     "guildId": "GUILD_ID",
     "token": "DISORD_API_TOKEN",
-	"giphyApiKey": "GIPHY_API_KEY"
+	 "giphyApiKey": "GIPHY_API_KEY"
 }
