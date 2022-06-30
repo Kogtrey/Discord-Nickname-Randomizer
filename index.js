@@ -1,3 +1,11 @@
+//Database Dependencies:
+const Promise = require('bluebird')
+const DBM = require('./data/dbmanager')
+const UserRepo = require('./data/Tables/UserRepo')
+const NicknameRepo = require('./data/Tables/NicknameRepo')
+const { resolve } = require('bluebird')
+
+//Discord Dependencies:
 const fs = require('fs');
 const Discord = require('discord.js');
 const Client = require('./client/Client.js');
@@ -6,12 +14,11 @@ const { Player } = require('discord-player');
 const { MessageEmbed } = require('discord.js')
 global.AbortController = require('node-abort-controller').AbortController;
 
-
+//Initializations:
 const client = new Client();
-
-
-
-
+const dbm = new DBM('./data/db.sqlite3')
+const userRepo = new UserRepo(dbm)
+const nicknameRepo = new NicknameRepo(dbm)
 
 client.commands = new Discord.Collection();
 const commandfiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
