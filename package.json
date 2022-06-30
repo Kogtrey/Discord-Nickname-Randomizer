@@ -1,0 +1,23 @@
+{
+  "name": "discord-nickname-randomizer",
+  "version": "1.0.0",
+  "description": "Discord bot to randomize user nicknames based on a list of preferred names",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kogtrey/Discord-Nickname-Randomizer.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Kogtrey/Discord-Nickname-Randomizer/issues"
+  },
+  "homepage": "https://github.com/Kogtrey/Discord-Nickname-Randomizer#readme",
+  "dependencies": {
+    "discord.js": "^13.8.1"
+  }
+}
