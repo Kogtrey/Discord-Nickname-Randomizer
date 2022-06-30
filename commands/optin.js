@@ -13,7 +13,7 @@ module.exports = {
                     client.userRepo.create(interaction.user.username, interaction.user.id)
                     interaction.reply(`User ${interaction.user.username} opted in!`)
                 } else {
-                    interaction.reply(`Usser ${interaction.user.username} already opted in (id: ${user.id})`)
+                    interaction.reply(`User ${interaction.user.username} already opted in (id: ${user.id})`)
                 }
             })
     }
