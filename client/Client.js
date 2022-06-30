@@ -3,7 +3,7 @@ const DBM = require('../data/dbmanager')
 const UserRepo = require('../data/Tables/UserRepo')
 const NicknameRepo = require('../data/Tables/NicknameRepo')
 
-const dbm = new DBM('../data/db.sqlite3')
+const dbm = new DBM('./data/db.sqlite3')
 
 module.exports = class extends Client {
   constructor(config) {

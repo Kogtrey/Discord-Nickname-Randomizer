@@ -15,9 +15,6 @@ global.AbortController = require('node-abort-controller').AbortController;
 
 //Initializations:
 const client = new Client();
-const dbm = new DBM('./data/db.sqlite3');
-const userRepo = new UserRepo(dbm);
-const nicknameRepo = new NicknameRepo(dbm);
 
 client.commands = new Discord.Collection();
 const commandfiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
