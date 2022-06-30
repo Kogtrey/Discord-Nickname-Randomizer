@@ -8,23 +8,27 @@ class UserRepo {
         const sql = `
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            discordId INTEGER,
             name TEXT
         )`
         return this.dbm.run(sql)
     }
 
     //basic table methods:
-    create(name) {
+    create(name, discordId) {
         return this.dbm.run(
-            'INSERT INTO users (name) VALUES (?)',
-            [name]
+            'INSERT INTO users (name, discordId) VALUES (?, ?)',
+            [name, discordId]
         )
     }
     update(user) {
-        const { id, name} = user
+        const { id, name, discordId} = user
         return this.dbm.run(
-            `UPDATE users SET name = ? WHERE id = ?`,
-            [name, id]
+            `UPDATE users 
+            SET name = ?,
+                discordId = ?
+            WHERE id = ?`,
+            [name, discordId, id]
         )
     }
 
@@ -40,6 +44,13 @@ class UserRepo {
         return this.dbm.get(
             `SELECT * FROM users WHERE id = ?`,
             [id]
+        )
+    }
+
+    getByDiscordId(discordId) {
+        return this.dbm.get(
+            `SELECT * FROM users WHERE discordId = ?`,
+            [discordId]
         )
     }
 

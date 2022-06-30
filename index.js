@@ -1,9 +1,9 @@
 //Database Dependencies:
-const Promise = require('bluebird')
-const DBM = require('./data/dbmanager')
-const UserRepo = require('./data/Tables/UserRepo')
-const NicknameRepo = require('./data/Tables/NicknameRepo')
-const { resolve } = require('bluebird')
+const Promise = require('bluebird');
+const DBM = require('./data/dbmanager');
+const UserRepo = require('./data/Tables/UserRepo');
+const NicknameRepo = require('./data/Tables/NicknameRepo');
+const { resolve } = require('bluebird');
 
 //Discord Dependencies:
 const fs = require('fs');
@@ -15,9 +15,9 @@ global.AbortController = require('node-abort-controller').AbortController;
 
 //Initializations:
 const client = new Client();
-const dbm = new DBM('./data/db.sqlite3')
-const userRepo = new UserRepo(dbm)
-const nicknameRepo = new NicknameRepo(dbm)
+const dbm = new DBM('./data/db.sqlite3');
+const userRepo = new UserRepo(dbm);
+const nicknameRepo = new NicknameRepo(dbm);
 
 client.commands = new Discord.Collection();
 const commandfiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
@@ -28,8 +28,12 @@ for (const file of commandfiles) {
 }
 
 client.once('ready', () => {
+
+    client.userRepo.createTable();
+    client.nicknameRepo.createTable();
 	console.log('Ready!');
     client.user.setActivity('noobis torture kogtrey', { type: 'WATCHING' });
+
 });
 
 client.on('interactionCreate', async interaction => {
