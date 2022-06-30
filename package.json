@@ -18,6 +18,8 @@
   },
   "homepage": "https://github.com/Kogtrey/Discord-Nickname-Randomizer#readme",
   "dependencies": {
-    "discord.js": "^13.8.1"
+    "bluebird": "^3.7.2",
+    "discord.js": "^13.8.1",
+    "sqlite3": "^5.0.8"
   }
 }
