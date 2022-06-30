@@ -8,7 +8,7 @@ class DBM {
             if (err) {
                 console.log('Could not connect to database', err)
             } else {
-                console.log('Connected to datbase')
+                console.log('Connected to database')
             }
         })
     }

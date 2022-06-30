@@ -10,7 +10,6 @@ const fs = require('fs');
 const Discord = require('discord.js');
 const Client = require('./client/Client.js');
 const config = require('./config.json');
-const { Player } = require('discord-player');
 const { MessageEmbed } = require('discord.js')
 global.AbortController = require('node-abort-controller').AbortController;
 
@@ -28,11 +27,9 @@ for (const file of commandfiles) {
     client.commands.set(command.data.name, command);
 }
 
-const player = new Player(client);
-
 client.once('ready', () => {
 	console.log('Ready!');
-    client.user.setActivity('noobis torture himself', { type: 'WATCHING' });
+    client.user.setActivity('noobis torture kogtrey', { type: 'WATCHING' });
 });
 
 client.on('interactionCreate', async interaction => {

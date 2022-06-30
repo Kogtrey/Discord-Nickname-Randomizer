@@ -20,6 +20,7 @@
   "dependencies": {
     "bluebird": "^3.7.2",
     "discord.js": "^13.8.1",
+    "node-abort-controller": "^3.0.1",
     "sqlite3": "^5.0.8"
   }
 }
