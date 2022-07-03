@@ -20,19 +20,19 @@ module.exports = {
                         content: 'React with a thumbs up if you would like to erase all nickname data and opt out of nickname changing.',
                         fetchReply: true
                     })
-                    message.react('👍').then(() => message.react('👎'))
+                    message.react(':thumbsup:').then(() => message.react(':thumbsdown:'))
             
                     const filter = (reaction,usr) => {
-                        return ['👍','👎'].includes(reaction.emoji.name) && usr.id === interaction.user.id
+                        return [':thumbsup:',':thumbsdown:'].includes(reaction.emoji.name) && usr.id === interaction.user.id
                     }
                     //Check for thumbs up reaction:
                     message.awaitReactions({ filter, max: 1, time: 60000, errors: ['time'] })
                         .then( async (collected) => {
                             const reaction = collected.first()
                             //if thumbs up, remove from database
-                            if (reaction.emoji.name === '👍') {
+                            if (reaction.emoji.name === ':thumbsup:') {
                                 client.userRepo.deleteByDiscordId(interaction.user.id)
-                                await interaction.user.send('You are not opted out of nickname changing.')
+                                await interaction.user.send('You are now opted out of nickname changing.')
                             } else {
                                 await interaction.user.send('You have canceled the opt out process.')
                             }
