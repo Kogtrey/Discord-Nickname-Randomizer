@@ -9,29 +9,32 @@ module.exports = {
         console.log(`User ${interaction.user.username} : ${interaction.user.id} sent /optout`)
         //Get User In DB:
         client.userRepo.getById(interaction.user.id)
-            .then((user) => {
+            .then( async (user) => {
                 //If user exists, confirm opt out:
                 if(user) {
-                    interaction.reply({
+                    await interaction.reply({
                         content: 'confirm in DM'
                     })
                     //Send dm to user:
-                    const message = interaction.user.send('React with a thumbs up if you would like to erase all nickname data and opt out of nickname changing.')
+                    const message = await interaction.user.send({
+                        content: 'React with a thumbs up if you would like to erase all nickname data and opt out of nickname changing.',
+                        fetchReply: true
+                    })
                     message.react('👍').then(() => message.react('👎'))
             
-                    const filter = (reaction, user) => {
-                        return ['👍','👎'].includes(reaction.emoji.name) && user.id === interaction.user.id
+                    const filter = (reaction,usr) => {
+                        return ['👍','👎'].includes(reaction.emoji.name) && usr.id === interaction.user.id
                     }
                     //Check for thumbs up reaction:
                     message.awaitReactions({ filter, max: 1, time: 60000, errors: ['time'] })
-                        .then(collected => {
+                        .then( async (collected) => {
                             const reaction = collected.first()
                             //if thumbs up, remove from database
                             if (reaction.emoji.name === '👍') {
                                 client.userRepo.deleteByDiscordId(interaction.user.id)
-                                interaction.user.send('You are not opted out of nickname changing.')
+                                await interaction.user.send('You are not opted out of nickname changing.')
                             } else {
-                                interaction.user.send('You have canceled the opt out process. Send /optout in the channel again to start over.')
+                                await interaction.user.send('You have canceled the opt out process.')
                             }
                         })
                         .catch(collected => {

@@ -7,12 +7,16 @@ module.exports = {
     async execute(interaction,client){
         console.log(`User ${interaction.user.username} : ${interaction.user.id} sent /optin`)
         client.userRepo.getById(interaction.user.id)
-            .then((user) => {
+            .then( async (user) => {
                 if(!user){
                     client.userRepo.create(interaction.user.id, interaction.user.username)
-                    interaction.reply(`User ${interaction.user.username} opted in!`)
+                    await interaction.reply({
+                        content: `User ${interaction.user.username} opted in!`
+                    })
                 } else {
-                    interaction.reply(`User ${interaction.user.username} already opted in (id: ${user.id})`)
+                    await interaction.reply({
+                        content: `User ${interaction.user.username} already opted in.`
+                    })
                 }
             })
     }
