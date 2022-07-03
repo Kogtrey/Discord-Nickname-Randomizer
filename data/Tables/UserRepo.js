@@ -44,7 +44,7 @@ class UserRepo {
             `
             DELETE FROM users WHERE discordId = ?
             `,
-            [disocrdId]
+            [discordId]
         )
     }
 
