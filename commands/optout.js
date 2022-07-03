@@ -10,7 +10,7 @@ module.exports = {
         client.userRepo.getByDiscordId(interaction.user.id)
             .then((user) => {
                 if(user){
-                   client.userRepo.deleteByDiscordId(interaciont.user.id)
+                   client.userRepo.deleteByDiscordId(interaction.user.id)
                    interaction.reply(`User ${interaction.user.username} has opted out.`)
                 } else {
                     interaction.reply(`User ${interaction.user.username} is already opted out.`)
