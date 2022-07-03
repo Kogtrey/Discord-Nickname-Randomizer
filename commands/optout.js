@@ -11,7 +11,26 @@ module.exports = {
         await interaction.reply({
             content: 'confirm in DM'
         })
-        await interaction.user.send('it works')
+        const message = await interaction.user.send('it works')
+        message.react('👍').then(() => message.react('👎'))
+
+        const filter = (reaction, user) => {
+            return ['👍','👎'].includes(reaction.emoji.name) && user.id === interaction.user.id
+        }
+
+        message.awaitReactions({ filter, max: 1, time: 60000, errors: ['time'] })
+            .then(collected => {
+                const reaction = collected.first()
+
+                if (reaction.emoji.name === '👍') {
+
+                } else {
+
+                }
+            })
+            .catch(collected => {
+                
+            })
         //client.userRepo.getByDiscordId(interaction.user.id)
         //     .then((user) => {
         //        if(user){
