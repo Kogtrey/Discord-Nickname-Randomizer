@@ -39,6 +39,15 @@ class UserRepo {
         )
     }
 
+    deleteByDiscordId(discordId) {
+        return this.dbm.run(
+            `
+            DELETE FROM users WHERE discordId = ?
+            `,
+            [disocrdId]
+        )
+    }
+
     //Querying:
     getById(id) {
         return this.dbm.get(
