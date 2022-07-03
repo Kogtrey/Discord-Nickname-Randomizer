@@ -31,20 +31,20 @@ client.once('ready', () => {
 	console.log('Ready!');
     client.user.setActivity('noobis torture kogtrey', { type: 'WATCHING' });
 
-    while(true){
-        //Total BS code. Don't trust it!
-        //Gets all users:
-        client.userRepo.getAll()
-            .then((users) => {
-                users.forEach((user) => {
-                    //Get nicknames for this user:
-                    client.NicknameRepo.getById(user.id)
-                    .then((nicknames) => {
-                        //Get a random nickname and do something with it:
-                    })
-                })
-            })
-    }
+    // while(true){
+    //     //Total BS code. Don't trust it!
+    //     //Gets all users:
+    //     client.userRepo.getAll()
+    //         .then((users) => {
+    //             users.forEach((user) => {
+    //                 //Get nicknames for this user:
+    //                 client.NicknameRepo.getById(user.id)
+    //                 .then((nicknames) => {
+    //                     //Get a random nickname and do something with it:
+    //                 })
+    //             })
+    //         })
+    // }
 });
 
 client.on('interactionCreate', async interaction => {
