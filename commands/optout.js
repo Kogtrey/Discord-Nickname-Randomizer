@@ -11,7 +11,7 @@ module.exports = {
         await interaction.reply({
             content: 'confirm in DM'
         })
-        await interaction.user.id.send('it works')
+        await interaction.user.send('it works')
         //client.userRepo.getByDiscordId(interaction.user.id)
         //     .then((user) => {
         //        if(user){
