@@ -3,7 +3,7 @@ const { SlashCommandBuilder } = require('@discordjs/builders')
 module.exports = {
         data: new SlashCommandBuilder()
             .setName('optin')
-            .setDescription('Opts a user in to have their nickname randomly changed'),
+            .setDescription('Opts you in to having your nickname randomly changed.'),
     async execute(interaction,client){
         console.log(`User ${interaction.user.username} : ${interaction.user.id} sent /optin`)
         client.userRepo.getById(interaction.user.id)

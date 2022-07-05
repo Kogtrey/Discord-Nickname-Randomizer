@@ -4,7 +4,7 @@ const { Interaction, InteractionCollector } = require('discord.js')
 module.exports = {
         data: new SlashCommandBuilder()
             .setName('optout')
-            .setDescription('Opts a user out of having their nickname randomly changed'),
+            .setDescription('Opts you out of having your nickname randomly changed, and deletes your set nicknames.'),
     async execute(interaction,client){
         console.log(`User ${interaction.user.username} : ${interaction.user.id} sent /optout`)
         //Get User In DB:
@@ -31,9 +31,19 @@ module.exports = {
                             const reaction = collected.first()
                             //if thumbs up, remove from database
                             if (reaction.emoji.name === '👍') {
+                                //Remove User:
                                 client.userRepo.delete(interaction.user.id)
+
+                                //Remove nicknames associated to user:
+                                client.nicknameRepo.getNicknames(interaction.user.id)
+                                    .then( (nicknames) => {
+                                        nicknames.forEach(nickname => {
+                                            client.nicknameRepo.delete(nickname.id)
+                                        });
+                                    })
+
                                 await interaction.user.send('You are now opted out of nickname changing.')
-                                console.log(`Removed user ${interaction.username} from database`)
+                                console.log(`Removed user ${interaction.user.username} and their nicknames from database`)
                             //if thumbs down, cancel removal from database:
                             } else {
                                 await interaction.user.send('You have canceled the opt out process.')
