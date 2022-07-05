@@ -31,22 +31,30 @@ client.once('ready', () => {
     client.userRepo.createTable();
     client.nicknameRepo.createTable();
 
-    let scheduledNicknameChange = new Cron.CronJob('*/1 * * * *', () =>{
-        console.log("Changing nicknames")
-        //Get all users:
-        client.userRepo.getAll()
-            .then((users) => {
-                //Get nicknames for this user:
-                users.forEach((user) => {
-                    client.nicknameRepo.getNicknames(user.id)
-                        .then((nicknames) => {
-                            //Pick a random nickame and set it as this users discord nickname:
-                            //TODO: Get discord member by user.id
-                            //TODO: Change nickname to random nickname like this: discordUser.setNickname(nicknames[Math.floor(Math.random()*nicknames.length)])
-                        })
-                });
-            })
-    })
+    let scheduledNicknameChange = new Cron.CronJob('*/1 * * * *', async () =>{
+        //get guild:
+       await client.guilds.fetch(config.guildId)
+            .then( async (guild) => {
+                //Get all users:
+                client.userRepo.getAll()
+                    .then( async (users) => {
+                    //Get nicknames for this user:
+                        users.forEach( async (user) => {
+                            console.log(`Database User: ${user.name} : ${user.id}`)
+                            //Get Guild Member:
+                            await guild.members.fetch(user.id)
+                                .then((member) =>{
+                                    //Get users nicknames
+                                    client.nicknameRepo.getNicknames(user.id)
+                                        .then((nicknames) => {
+                                            //Change users nickname:
+                                            member.setNickname(nicknames[Math.floor(Math.random()*nicknames.length)].nickname)
+                                        });
+                                });
+                        });
+                    });
+            });
+    });
 
 	console.log('Ready!');
     client.user.setActivity('noobis torture kogtrey', { type: 'WATCHING' });
