@@ -5,21 +5,32 @@ const { SlashCommandBuilder } = require('@discordjs/builders')
 module.exports = {
         data: new SlashCommandBuilder()
             .setName('resetnicknames')
-            .setDescription('<NOT DEVELOPED>'),
+            .setDescription('Removes all of your current set nicknames.'),
     async execute(interaction,client){
         console.log(`User ${interaction.user.username} : ${interaction.user.id} sent /resetnicknames`)
         client.userRepo.getById(interaction.user.id)
             .then( async (user) => {
                 if(user){
                     //User is Opted In:
-                    await interaction.reply({
-                        content: `:construction: This is command is under construction. Hold tight :construction:`
+
+                    //Remove nicknames associated to user:
+                    client.nicknameRepo.getNicknames(interaction.user.id)
+                    .then( (nicknames) => {
+                        nicknames.forEach(nickname => {
+                            client.nicknameRepo.delete(nickname.id)
+                        });
                     })
+
+                    await interaction.reply({
+                        content: `Your nicknames have been removed. To add nicknames again, type \`/setnicknames\`.`
+                    })
+
+                    console.log(`Removed nicknames for User ${interaction.user.username}`)
 
                 } else {
                     //User is not Opted In:
                     await interaction.reply({
-                        content: `:construction: This is command is under construction. Hold tight :construction:`
+                        content: `User ${interaction.user.username} is not opted in. Type \`/optin\` to set nicknames.`
                     })
                 }
             })
