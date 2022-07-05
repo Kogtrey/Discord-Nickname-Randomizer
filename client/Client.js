@@ -8,7 +8,14 @@ const dbm = new DBM('./data/db.sqlite3')
 module.exports = class extends Client {
   constructor(config) {
     super({
-      intents: [Intents.FLAGS.GUILD_VOICE_STATES, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILDS],
+      intents: [
+        Intents.FLAGS.GUILD_VOICE_STATES,
+        Intents.FLAGS.GUILD_MESSAGES,
+        Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+        Intents.FLAGS.DIRECT_MESSAGES,
+        Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
+        Intents.FLAGS.GUILDS
+      ],
     });
 
     this.userRepo = new UserRepo(dbm)
