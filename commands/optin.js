@@ -13,6 +13,7 @@ module.exports = {
                     await interaction.reply({
                         content: `User ${interaction.user.username} opted in!`
                     })
+                    console.log(`Created user ${interaction.user.username} : ${interaction.user.id} in the database`)
                 } else {
                     await interaction.reply({
                         content: `User ${interaction.user.username} already opted in.`

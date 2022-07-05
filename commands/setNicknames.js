@@ -39,7 +39,7 @@ module.exports = {
                             });
 
                             await interaction.user.send(`Nicknames list has been set! No further action required.`)
-                            console.log(`${interaction.user.username} added ${list.length} nicknames.`)
+                            console.log(`${interaction.user.username} added ${list.length} nicknames`)
                         })
                         .catch( async (collection) =>{
                             console.log(collection)

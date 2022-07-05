@@ -15,6 +15,7 @@ module.exports = {
                     client.nicknameRepo.getNicknames(interaction.user.id)
                         .then(async (nicknames) => {
 
+                            console.log(nicknames)
                             if(nicknames.length > 0){
                                 nicknames.forEach((nickname) => {
                                     nicknameString += `- ${nickname.nickname}\n`

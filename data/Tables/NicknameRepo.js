@@ -61,7 +61,7 @@ class NicknameRepo {
     }
 
     getAll() {
-        return this.dbm.get(
+        return this.dbm.all(
             `SELECT * FROM nicknames`
         )
     }
