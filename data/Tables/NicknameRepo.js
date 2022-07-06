@@ -9,7 +9,7 @@ class NicknameRepo {
         CREATE TABLE IF NOT EXISTS nicknames (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nickname TEXT,
-            userId INTEGER,
+            userId TEXT,
             CONSTRAINT nicknames_fk_userId FOREIGN KEY (userId)
                 REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE
         )`

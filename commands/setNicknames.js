@@ -33,7 +33,7 @@ module.exports = {
 
                     message.channel.awaitMessages({filter, max: 1, time: 600_000})
                         .then( async (collected) => {
-                            let list = collected.first().content.split(',')
+                            let list = collected.first().content.replace(/\s*,\s*/g, ",").split(',')
                             list.forEach(nickname => {
                                 client.nicknameRepo.create(nickname,interaction.user.id)
                             });

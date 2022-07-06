@@ -7,7 +7,7 @@ class UserRepo {
     createTable() {
         const sql = `
         CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY,
+            id TEXT PRIMARY KEY,
             name TEXT
         )`
         return this.dbm.run(sql)

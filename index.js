@@ -15,6 +15,7 @@ global.AbortController = require('node-abort-controller').AbortController;
 
 //Other Dependencies:
 const Cron = require('cron');
+const { Console } = require('console');
 
 //Initializations:
 const client = new Client();
@@ -31,29 +32,38 @@ client.once('ready', () => {
     client.userRepo.createTable();
     client.nicknameRepo.createTable();
 
-    let scheduledNicknameChange = new Cron.CronJob('*/1 * * * *', async () =>{
-        //get guild:
-       await client.guilds.fetch(config.guildId)
-            .then( async (guild) => {
-                //Get all users:
-                client.userRepo.getAll()
-                    .then( async (users) => {
-                    //Get nicknames for this user:
-                        users.forEach( async (user) => {
-                            console.log(`Database User: ${user.name} : ${user.id}`)
-                            //Get Guild Member:
-                            await guild.members.fetch(user.id)
-                                .then((member) =>{
-                                    //Get users nicknames
-                                    client.nicknameRepo.getNicknames(user.id)
-                                        .then((nicknames) => {
-                                            //Change users nickname:
-                                            member.setNickname(nicknames[Math.floor(Math.random()*nicknames.length)].nickname)
-                                        });
-                                });
+    let scheduledNicknameChange = new Cron.CronJob('0 0 * * 3', async () =>{
+        //Get guild:
+        await client.guilds.fetch(config.guildId)
+        .then( async (guild) => {
+            //Get all users in optin list:
+            await client.userRepo.getAll()
+            .then( async (users) => {
+                //For each user:
+                users.forEach( async (user) => {
+                    //Get GuildMember object:
+                    await guild.members.fetch(`${user.id}`)
+                    .then( async (member) => {
+                        //Get nicknames for this user:
+                        await client.nicknameRepo.getNicknames(user.id)
+                        .then( async (nicknames) => {
+                            //If there are stored nicknames, pick a random one. Else, do nothing:
+                            if(nicknames.length > 0){
+                                let oldnickname = member.nickname
+                                let newnickname = nicknames[Math.floor(Math.random()*nicknames.length)].nickname
+                                while(oldnickname === newnickname){
+                                    newnickname = nicknames[Math.floor(Math.random()*nicknames.length)].nickname
+                                }
+                                await member.setNickname(newnickname)
+                                console.log(`Changed nickname for ${user.name} : ${user.id} to ${newnickname} (Originally ${oldnickname})`)
+                            } else {
+                                console.log(`User ${user.name} : ${user.id} has no nicknames to change.`)
+                            }
                         });
                     });
+                });
             });
+        });
     });
 
 	console.log('Ready!');
