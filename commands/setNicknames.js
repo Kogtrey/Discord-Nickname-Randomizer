@@ -25,7 +25,6 @@ module.exports = {
                         
                         \*\*Don't:\*\*
                         - Don't use names with symbols in them or anything other than text (dashes (-) and underscores (_) are okay. Use discretion).
-                        - Don't add spaces between each name.
                         `
                     })
 

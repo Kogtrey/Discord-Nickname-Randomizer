@@ -47,7 +47,7 @@ module.exports = {
                             //if thumbs down, cancel removal from database:
                             } else {
                                 await interaction.user.send('You have canceled the opt out process.')
-                                console.log(`User ${interaction.username} canceled opting out`)
+                                console.log(`User ${interaction.user.username} canceled opting out`)
                             }
                         // If no reaction, notify that user needs to react for process to work:
                         })
