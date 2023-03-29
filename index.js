@@ -33,37 +33,32 @@ client.once('ready', () => {
     client.nicknameRepo.createTable();
 
     let scheduledNicknameChange = new Cron.CronJob('0 0 * * 3', async () =>{
-        //Get guild:
-        await client.guilds.fetch(config.guildId)
-        .then( async (guild) => {
-            //Get all users in optin list:
-            await client.userRepo.getAll()
-            .then( async (users) => {
-                //For each user:
-                users.forEach( async (user) => {
-                    //Get GuildMember object:
-                    await guild.members.fetch(`${user.id}`)
-                    .then( async (member) => {
-                        //Get nicknames for this user:
-                        await client.nicknameRepo.getNicknames(user.id)
-                        .then( async (nicknames) => {
-                            //If there are stored nicknames, pick a random one. Else, do nothing:
-                            if(nicknames.length > 0){
-                                let oldnickname = member.nickname
-                                let newnickname = nicknames[Math.floor(Math.random()*nicknames.length)].nickname
-                                while(oldnickname === newnickname){
-                                    newnickname = nicknames[Math.floor(Math.random()*nicknames.length)].nickname
-                                }
-                                await member.setNickname(newnickname)
-                                console.log(`Changed nickname for ${user.name} : ${user.id} to ${newnickname} (Originally ${oldnickname})`)
-                            } else {
-                                console.log(`User ${user.name} : ${user.id} has no nicknames to change.`)
-                            }
-                        });
-                    });
-                });
-            });
+        
+        let guild = await client.guilds.fetch(config.guildId)
+       
+        let users = await client.userRepo.getAll()
+        //For each opted user:
+        users.forEach( async (user) => {
+            
+            let member = await guild.members.fetch(`${user.id}`)
+
+            let nicknames = await client.nicknameRepo.getNicknames(user.id)
+
+            //If there are stored nicknames, pick a random one. Else, do nothing:
+            if(nicknames.length > 0){
+                let oldnickname = member.nickname
+                let newnickname = nicknames[Math.floor(Math.random()*nicknames.length)].nickname
+                while(oldnickname === newnickname){
+                    newnickname = nicknames[Math.floor(Math.random()*nicknames.length)].nickname
+                }
+                await member.setNickname(newnickname)
+                console.log(`Changed nickname for ${user.name} : ${user.id} to ${newnickname} (Originally ${oldnickname})`)
+            } else {
+                console.log(`User ${user.name} : ${user.id} has no nicknames to change.`)
+            }
+
         });
+
     });
 
 	console.log('Ready!');

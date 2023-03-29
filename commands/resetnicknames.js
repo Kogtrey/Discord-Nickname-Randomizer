@@ -8,31 +8,25 @@ module.exports = {
             .setDescription('Removes all of your current set nicknames.'),
     async execute(interaction,client){
         console.log(`User ${interaction.user.username} : ${interaction.user.id} sent /resetnicknames`)
-        client.userRepo.getById(interaction.user.id)
-            .then( async (user) => {
-                if(user){
-                    //User is Opted In:
+        let user = await client.userRepo.getById(interaction.user.id)
+        if(user){//User is Opted In:
+            //Remove nicknames associated to user:
+            let nicknames = await client.nicknameRepo.getNicknames(interaction.user.id)
+            nicknames.forEach(nickname => {
+                client.nicknameRepo.delete(nickname.id)
+            });
 
-                    //Remove nicknames associated to user:
-                    client.nicknameRepo.getNicknames(interaction.user.id)
-                    .then( (nicknames) => {
-                        nicknames.forEach(nickname => {
-                            client.nicknameRepo.delete(nickname.id)
-                        });
-                    })
-
-                    await interaction.reply({
-                        content: `Your nicknames have been removed. To add nicknames again, type \`/setnicknames\`.`
-                    })
-
-                    console.log(`Removed nicknames for User ${interaction.user.username}`)
-
-                } else {
-                    //User is not Opted In:
-                    await interaction.reply({
-                        content: `User ${interaction.user.username} is not opted in. Type \`/optin\` to set nicknames.`
-                    })
-                }
+            await interaction.reply({
+                content: `Your nicknames have been removed. To add nicknames again, type \`/setnicknames\`.`
             })
+
+            console.log(`Removed nicknames for User ${interaction.user.username}`)
+
+        } else {
+            //User is not Opted In:
+            await interaction.reply({
+                content: `User ${interaction.user.username} is not opted in. Type \`/optin\` to set nicknames.`
+            })
+        }
     }
 }

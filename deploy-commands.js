@@ -3,11 +3,10 @@ const { Routes } = require('discord-api-types/v9');
 const { token, clientId, guildId } = require('./config.json');
 const fs = require('node:fs');
 
-const commands = [];
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+const commands = []; //initialize
+const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js')); //Get all command definitions
 
-
-
+// Iterate through command definitions and require them to be loaded:
 for (const file of commandFiles) {
 	const command = require(`./commands/${file}`);
 	commands.push(command.data.toJSON());
