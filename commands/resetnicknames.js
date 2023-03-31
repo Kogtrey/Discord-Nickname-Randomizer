@@ -2,6 +2,8 @@
 //TODO: Command to list nicknames of current user
 const { SlashCommandBuilder } = require('@discordjs/builders')
 
+// TODO: SET UP GuildSync Logic
+
 module.exports = {
         data: new SlashCommandBuilder()
             .setName('resetnicknames')
@@ -9,11 +11,15 @@ module.exports = {
     async execute(interaction,client){
         console.log(`User ${interaction.user.username} : ${interaction.user.id} sent /resetnicknames`)
         let user = await client.userRepo.getById(interaction.user.id)
-        if(user){//User is Opted In:
+        console.log(`${user.name} guild sync: ${user.guildsync}`)
+
+        let guildUser = await client.guildUserRepo.getGuildUser(interaction.user.id, interaction.guildId)
+
+        if(guildUser){//User is Opted In:
             //Remove nicknames associated to user:
-            let nicknames = await client.nicknameRepo.getNicknames(interaction.user.id)
-            nicknames.forEach(nickname => {
-                client.nicknameRepo.delete(nickname.id)
+            let guildUserNicknames = await client.guildUserNicknameRepo.getGuildUserNicknames(guildUser.id)
+            guildUserNicknames.forEach(guildUserNickname => {
+                client.guildUserNicknameRepo.delete(guildUserNickname.id)
             });
 
             await interaction.reply({

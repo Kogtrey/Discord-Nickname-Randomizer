@@ -1,6 +1,8 @@
 const { SlashCommandBuilder } = require('@discordjs/builders')
 const { Interaction, InteractionCollector } = require('discord.js')
 
+// TODO: SET UP GuildSync Logic
+
 module.exports = {
         data: new SlashCommandBuilder()
             .setName('optout')
@@ -25,25 +27,35 @@ module.exports = {
             }
 
             //Check for thumbs up reaction:
-            message.awaitReactions({ filter, max: 1, time: 6000, errors: ['time'] })
+            message.awaitReactions({ filter, max: 1, time: 60000, errors: ['time'] })
                 .then(async(collected)=> {
                     const reaction = collected.first()
                     //if thumbs up, remove from database
                     if(reaction.emoji.name === '👍'){
                         //Remove user:
-                        client.userRepo.delete(interaction.user.id)
-                        
-                        //Remove nicknames associated to user:
-                        let nicknames = await client.nicknameRepo.getNicknames(interaction.user.id)
-                        if(nicknames){
-                            nicknames.forEach(nickname=>{
-                                client.nicknameRepo.delete(nickname.id)
-                            })
-                            
+                        let guildUser = await client.guildUserRepo.getGuildUser(interaction.user.id, interaction.guildId)
+                        console.log(guildUser)
+                        if(guildUser){
+                            await client.guildUserRepo.delete(guildUser.id)
+                            console.log(`Removed nickname links at guild ${interaction.guildId} for user ${interaction.user.username}`)
                         }
+                        
+                        let existingGuildUsers = await client.guildUserRepo.getByUserId(interaction.user.id)
+                        console.log(existingGuildUsers)
+                        if(existingGuildUsers.length === 0){
+                            client.userRepo.delete(interaction.user.id)
+                            console.log(`Detected no existing GuildUsers, Removed user ${interaction.user.username} and their nicknames from database`)
+                        }
+                        //Remove nicknames associated to user:
+                        // let nicknames = await client.nicknameRepo.getNicknames(interaction.user.id)
+                        // if(nicknames){
+                        //     nicknames.forEach(nickname=>{
+                        //         client.nicknameRepo.delete(nickname.id)
+                        //     })
+                            
+                        // }
 
                         await interaction.user.send('You are now opted out of nickname changing.')
-                        console.log(`Removed user ${interaction.user.username} and their nicknames from database`)
                     //if thumbs down, cancel removal from database:
                     } else {
                         await interaction.user.send('You have canceled the opt out process.')

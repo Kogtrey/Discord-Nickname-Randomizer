@@ -3,6 +3,8 @@ const Promise = require('bluebird');
 const DBM = require('./data/dbmanager');
 const UserRepo = require('./data/Tables/UserRepo');
 const NicknameRepo = require('./data/Tables/NicknameRepo');
+const GuildUserRepo = require('./data/Tables/GuildUserRepo');
+const GuildUserNickname = require('./data/Tables/GuildUserNicknameRepo');
 const { resolve } = require('bluebird');
 
 //Discord Dependencies:
@@ -16,6 +18,7 @@ global.AbortController = require('node-abort-controller').AbortController;
 //Other Dependencies:
 const Cron = require('cron');
 const { Console } = require('console');
+const commandmanager = require('./commandmanager')
 
 //Initializations:
 const client = new Client();
@@ -28,14 +31,24 @@ for (const file of commandfiles) {
     client.commands.set(command.data.name, command);
 }
 
-client.once('ready', () => {
+commandmanager.deploycommands(client)
+
+
+client.once('ready', async () => {
     client.userRepo.createTable();
     client.nicknameRepo.createTable();
+    client.guildUserRepo.createTable();
+    client.guildUserNicknameRepo.createTable();
+
 
     let scheduledNicknameChange = new Cron.CronJob('0 0 */3 * *', async () =>{
         
-        let guild = await client.guilds.fetch(config.guildId)
-       
+        let guilds = await client.guilds.fetch()
+        
+        guilds.each(guild=>{
+            // Filter users by guild
+        })
+
         let users = await client.userRepo.getAll()
         //For each opted user:
         users.forEach( async (user) => {

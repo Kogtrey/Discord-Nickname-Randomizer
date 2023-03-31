@@ -1,6 +1,6 @@
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
-const { token, clientId, guildId } = require('./config.json');
+const { token, clientId} = require('./config.json');
 const fs = require('node:fs');
 
 const commands = []; //initialize
@@ -14,17 +14,23 @@ for (const file of commandFiles) {
 
 const rest = new REST({ version: '9' }).setToken(token);
 
-(async () => {
-	try {
-		console.log('Started refreshing application (/) commands.');
 
-		await rest.put(
-			Routes.applicationGuildCommands(clientId, guildId),
-			{ body: commands },
-		);
-
-		console.log('Successfully reloaded application (/) commands.');
-	} catch (error) {
-		console.error(error);
+module.exports = {
+	async deploycommands(client){
+		try {
+			console.log('Started refreshing application (/) commands.');
+	
+			let guilds = await client.guilds.fetch()
+			guilds.each(async ({ id })=>{
+				await rest.put(
+					Routes.applicationGuildCommands(clientId, id),
+					{ body: commands },
+				);
+			})
+	
+			console.log('Successfully reloaded application (/) commands.');
+		} catch (error) {
+			console.error(error);
+		}
 	}
-})();
+}

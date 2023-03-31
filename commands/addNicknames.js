@@ -1,13 +1,19 @@
 const { SlashCommandBuilder } = require('@discordjs/builders')
 
+// TODO: SET UP GuildSync Logic
+
 module.exports = {
         data: new SlashCommandBuilder()
             .setName('addnicknames')
             .setDescription('Adds to the list of your nicknames that the bot will randomly select from.'),
     async execute(interaction,client){
-        console.log(`User ${interaction.user.username} : ${interaction.user.id} sent /addnicknames`)
-        let user = await client.userRepo.getById(interaction.user.id)     
-        if(user){
+        console.log(`User ${interaction.user.username} : ${interaction.user.id} at guild ${interaction.guildId} sent /addnicknames`)
+        let user = await client.userRepo.getById(interaction.user.id)
+        console.log(`${user.name} guild sync: ${user.guildsync}`)
+        
+        let guildUser = await client.guildUserRepo.getGuildUser(interaction.user.id, interaction.guildId)
+        //console.log(guildUser)
+        if(guildUser){
             //Request a comma separated list of nicknames:
             await interaction.reply({
                 content: `Check your direct messages for instructions.`
@@ -32,8 +38,17 @@ module.exports = {
             message.channel.awaitMessages({filter, max: 1, time: 600_000})
                 .then( async (collected) => {
                     let list = collected.first().content.replace(/\s*,\s*/g, ",").split(',')
-                    list.forEach(nickname => {
-                        client.nicknameRepo.create(nickname,interaction.user.id)
+                    list.forEach(async nickname => {
+
+                        let existingNickname = await client.nicknameRepo.getExistingNickname(nickname,interaction.user.id)
+
+                        if(existingNickname){
+                            client.guildUserNicknameRepo.create(existingNickname.id,guildUser.id)
+                            console.log(`${interaction.user.username}:${interaction.user.id} at guild ${interaction.guildId} re-added an existing nickname.`)
+                        } else {
+                            let createdNickname = await client.nicknameRepo.create(nickname,interaction.user.id)
+                            client.guildUserNicknameRepo.create(createdNickname.id,guildUser.id)
+                        }
                     });
 
                     await interaction.user.send(`Nicknames list has been set! No further action required.`)
@@ -48,7 +63,7 @@ module.exports = {
 
         } else {
             await interaction.reply({
-                content: `User ${interaction.user.username} is not opted in. Type \`/optin\` to set nicknames.`
+                content: `User ${interaction.user.username} is not opted in on this server. Type \`/optin\` to set nicknames.`
             })
         }
 

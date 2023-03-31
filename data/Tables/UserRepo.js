@@ -8,25 +8,27 @@ class UserRepo {
         const sql = `
         CREATE TABLE IF NOT EXISTS users (
             id TEXT PRIMARY KEY,
-            name TEXT
+            name TEXT,
+            guildsync NUMERIC
         )`
         return this.dbm.run(sql)
     }
 
     //basic table methods:
-    create(id, name) {
+    create(id, name, guildsync=0) {
         return this.dbm.run(
-            'INSERT INTO users (id, name) VALUES (?, ?)',
-            [id, name]
+            'INSERT INTO users (id, name, guildsync) VALUES (?, ?, ?)',
+            [id, name, guildsync]
         )
     }
     update(user) {
-        const { id, name} = user
+        const { id, name, guildsync} = user
         return this.dbm.run(
             `UPDATE users 
-            SET name = ?
+            SET name = ?,
+                guildsync = ?
             WHERE id = ?`,
-            [name, id]
+            [name, guildsync, id]
         )
     }
 
@@ -44,6 +46,13 @@ class UserRepo {
             [id]
         )
     }
+
+    // getByGuildId(guildId){
+    //     return this.dbm.get(
+    //         `SELECT * FROM users WHERE guildId = ?`,
+    //         [guildId]
+    //     )
+    // }
 
     getAll() {
         return this.dbm.all(
