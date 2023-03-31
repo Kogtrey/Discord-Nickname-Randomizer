@@ -7,6 +7,17 @@ module.exports = {
             .setName('addnicknames')
             .setDescription('Adds to the list of your nicknames that the bot will randomly select from.'),
     async execute(interaction,client){
+
+        async function Reply(message){
+            await interaction.reply({
+                content: message
+            })
+        }
+
+        async function Send(){
+
+        }
+
         console.log(`User ${interaction.user.username} : ${interaction.user.id} at guild ${interaction.guildId} sent /addnicknames`)
         let user = await client.userRepo.getById(interaction.user.id)
         console.log(`${user.name} guild sync: ${user.guildsync}`)
