@@ -9,6 +9,7 @@ class DBM {
                 console.log('Could not connect to database', err)
             } else {
                 console.log('Connected to database')
+                this.db.get("PRAGMA foreign_keys = ON")
             }
         })
     }

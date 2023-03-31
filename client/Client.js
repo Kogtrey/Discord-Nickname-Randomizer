@@ -2,6 +2,8 @@ const {Client, Collection, Intents} = require('discord.js');
 const DBM = require('../data/dbmanager')
 const UserRepo = require('../data/Tables/UserRepo')
 const NicknameRepo = require('../data/Tables/NicknameRepo')
+const GuildUserRepo = require('../data/Tables/GuildUserRepo')
+const GuildUserNicknameRepo = require('../data/Tables/GuildUserNicknameRepo')
 
 const dbm = new DBM('./data/db.sqlite3')
 
@@ -21,6 +23,8 @@ module.exports = class extends Client {
 
     this.userRepo = new UserRepo(dbm)
     this.nicknameRepo = new NicknameRepo(dbm)
+    this.guildUserRepo = new GuildUserRepo(dbm)
+    this.guildUserNicknameRepo = new GuildUserNicknameRepo(dbm)
 
     this.commands = new Collection();
 

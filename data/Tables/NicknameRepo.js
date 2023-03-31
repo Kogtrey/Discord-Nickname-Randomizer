@@ -9,33 +9,33 @@ class NicknameRepo {
         CREATE TABLE IF NOT EXISTS nicknames (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nickname TEXT,
-            userId TEXT,
-            CONSTRAINT nicknames_fk_userId FOREIGN KEY (userId)
+            creatorId TEXT,
+            CONSTRAINT fk_creatorId FOREIGN KEY (creatorId)
                 REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE
         )`
         return this.dbm.run(sql)
     }
     //basic table methods:
-    create(nickname,userId) {
+    create(nickname,creatorId) {
         return this.dbm.run(
             `
-            INSERT INTO nicknames (nickname, userId)
+            INSERT INTO nicknames (nickname, creatorId)
                 VALUES (?, ?)
             `,
-            [nickname, userId]
+            [nickname, creatorId]
         )
     }
 
     update(Nickname) {
-        const { id, nickname, userId} = Nickname
+        const { id, nickname, creatorId} = Nickname
         return this.dbm.run(
             `
             UDPATE nicknames
             SET nickname = ?,
-                userId = ?
+                creatorId = ?
             WHERE id = ?
             `,
-            [nickname,userId,id]
+            [nickname,creatorId,id]
         )
     }
 
@@ -60,19 +60,30 @@ class NicknameRepo {
         )
     }
 
+    getExistingNickname(nickname,creatorId){
+        return this.dbm.get(
+            `
+            SELECT * FROM nicknames
+            WHERE nickname = ?
+            AND creatorId = ?
+            `,
+            [nickname, creatorId]
+        )
+    }
+
     getAll() {
         return this.dbm.all(
             `SELECT * FROM nicknames`
         )
     }
 
-    getNicknames(userId) {
+    getNicknames(creatorId) {
         return this.dbm.all(
             `
             SELECT * FROM nicknames
-            WHERE userId = ?
+            WHERE creatorId = ?
             `,
-            [userId]
+            [creatorId]
         )
     }
 }
