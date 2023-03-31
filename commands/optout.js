@@ -9,7 +9,7 @@ module.exports = {
 
         console.log(`User ${interaction.user.username} : ${interaction.user.id} sent /optout`)
         //Get User In DB:
-        let nickNameUser = await client.userRepo.getById(interaction.user.id)
+        let nicknameUser = await client.userRepo.getById(interaction.user.id)
         if(nicknameUser){
             await interaction.reply({
                 content: 'Confirm in Direct Messages.'

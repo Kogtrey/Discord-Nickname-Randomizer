@@ -8,7 +8,7 @@ module.exports = {
         console.log(`User ${interaction.user.username} : ${interaction.user.id} sent /optin`)
         let user = await client.userRepo.getById(interaction.user.id)
         if(!user){ //User does not exist:
-            client.userRepo.create(interaciton.user.id, interaction.user.username )
+            client.userRepo.create(interaction.user.id, interaction.user.username )
             await interaction.reply({
                 content: `User ${interaction.user.username} opted in!`
             })

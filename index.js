@@ -32,7 +32,7 @@ client.once('ready', () => {
     client.userRepo.createTable();
     client.nicknameRepo.createTable();
 
-    let scheduledNicknameChange = new Cron.CronJob('0 0 * * 3', async () =>{
+    let scheduledNicknameChange = new Cron.CronJob('0 0 */3 * *', async () =>{
         
         let guild = await client.guilds.fetch(config.guildId)
        
@@ -62,7 +62,7 @@ client.once('ready', () => {
     });
 
 	console.log('Ready!');
-    client.user.setActivity('noobis torture kogtrey', { type: 'WATCHING' });
+    client.user.setActivity('Kloggers sleep. Zzzzz', { type: 'WATCHING' });
 
     scheduledNicknameChange.start()
 });

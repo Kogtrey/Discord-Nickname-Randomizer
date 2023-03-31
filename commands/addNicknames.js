@@ -2,10 +2,10 @@ const { SlashCommandBuilder } = require('@discordjs/builders')
 
 module.exports = {
         data: new SlashCommandBuilder()
-            .setName('setnicknames')
-            .setDescription('Sets the list of your nicknames that the bot will randomly select from.'),
+            .setName('addnicknames')
+            .setDescription('Adds to the list of your nicknames that the bot will randomly select from.'),
     async execute(interaction,client){
-        console.log(`User ${interaction.user.username} : ${interaction.user.id} sent /setnicknames`)
+        console.log(`User ${interaction.user.username} : ${interaction.user.id} sent /addnicknames`)
         let user = await client.userRepo.getById(interaction.user.id)     
         if(user){
             //Request a comma separated list of nicknames:
