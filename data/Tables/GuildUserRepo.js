@@ -49,12 +49,12 @@ class GuildUserRepo {
         )
     }
 
-    // getByGuildId(guildId){
-    //     return this.dbm.get(
-    //         `SELECT * FROM users WHERE guildId = ?`,
-    //         [guildId]
-    //     )
-    // }
+    getByGuildId(guildId){
+        return this.dbm.all(
+            `SELECT * FROM users WHERE guildId = ?`,
+            [guildId]
+        )
+    }
 
     getAll() {
         return this.dbm.all(
@@ -80,6 +80,23 @@ class GuildUserRepo {
             WHERE userId = ?
             `,
             [userId]
+        )
+    }
+
+    getGuildUserInfoByGuildId(guildId){
+        return this.dbm.all(
+            `
+            SELECT 
+                guildusers.id,
+                guildId,
+                userId,
+                name,
+                guildsync
+            FROM guildusers
+            LEFT JOIN users ON guildusers.userId = users.id
+            WHERE guildId = ?
+            `,
+            [guildId]
         )
     }
 

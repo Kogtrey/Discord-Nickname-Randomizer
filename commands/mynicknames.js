@@ -24,7 +24,7 @@ module.exports = {
         }
 
         // Start:
-        console.log(`User ${interaction.user.username} : ${interaction.user.id} at guild ${guildId} sent /mynicknames`)
+        console.log(`User ${interaction.user.username} : ${interaction.user.id} at guild ${interaction.guildId} sent /mynicknames`)
 
         // If No User:
         let user = await client.userRepo.getById(interaction.user.id)
@@ -34,13 +34,17 @@ module.exports = {
         }
 
         // If guild synced
+        console.log(user.guildsync)
         if (user.guildsync === 1){
             console.log(`${interaction.user.username} is guild synced`)
             //If no nicknames:
             let nicknames = await client.nicknameRepo.getNicknames(user.id)
             if(!(nicknames.length > 0)){
                 await Reply(`There are no nicknames on record for \*\*${interaction.user.username}\*\* globally. Use \`/setnicknames\` to set a list.`)
+                return
             }
+            await Reply(GenerateNicknameString(nicknames))
+            return
         }
         
         // If guild user:
@@ -54,6 +58,7 @@ module.exports = {
         let nicknames = await client.guildUserNicknameRepo.getGuildUserNicknames(guildUser.id)
         if(!(nicknames.length > 0)){
             await Reply(`There are no nicknames on record for \*\*${interaction.user.username}\*\* on this Server. Use \`/setnicknames\` to set a list.`)
+            return
         }
         
         await Reply(GenerateNicknameString(nicknames))
