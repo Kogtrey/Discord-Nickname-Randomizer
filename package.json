@@ -2,10 +2,11 @@
   "name": "discord-nickname-randomizer",
   "version": "1.0.0",
   "description": "Discord bot to randomize user nicknames based on a list of preferred names",
-  "main": "index.js",
+  "main": "shardmanager.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon shardmanager.js"
+    "start": "nodemon shardmanager.js",
+    "build": "nexe -r ['./config.json','./data/*','./commands/*'] --build"
   },
   "repository": {
     "type": "git",

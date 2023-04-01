@@ -42,7 +42,7 @@ client.once('ready', async () => {
     client.guildUserNicknameRepo.createTable();
 
 
-    let scheduledNicknameChange = new Cron.CronJob('*/1 * * * *', async () =>{
+    let scheduledNicknameChange = new Cron.CronJob('0 0 */1 * *', async () =>{
         console.log("Starting scheduled nickname change...")
         // Get list of registered guilds:
         let guilds = await client.guilds.fetch()
