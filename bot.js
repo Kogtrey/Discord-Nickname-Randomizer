@@ -76,6 +76,11 @@ client.once('ready', async () => {
                     let oldnickname = member.nickname
                     let newnickname = nicknames[Math.floor(Math.random()*nicknames.length)].nickname
                     
+                    if(nicknames.length === 1){
+                        newnickname = nicknames[0]
+                        oldnickname = null
+                    }
+
                     while(oldnickname === newnickname){
                         newnickname = nicknames[Math.floor(Math.random()*nicknames.length)].nickname
                     }
@@ -106,6 +111,7 @@ client.once('ready', async () => {
                         console.log(`User ${guildUser.name} : ${GuildUser.userId} has no nicknames to change to.`)
                         return
                     }
+
                     // Update nickname and finish:
                     await UpdateNickname(nicknames)
                     return

@@ -56,7 +56,7 @@ module.exports = {
         });
 
         await Reply(`Your nicknames have been removed. To add nicknames again, type \`/setnicknames\`.`)
-        console.log(`Removed nicknames for User ${interaction.user.username} at guild ${guildId}`)
+        console.log(`Removed nicknames for User ${interaction.user.username} at guild ${interaction.guildId}`)
 
     }
 }
