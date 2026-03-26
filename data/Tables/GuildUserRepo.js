@@ -83,6 +83,23 @@ class GuildUserRepo {
         )
     }
 
+    getGuildUserInfoByGuildId(guildId) {
+        return this.dbm.all(
+            `
+            SELECT 
+                guildusers.id,
+                guildId,
+                userId,
+                name,
+                guildsync
+            FROM guildusers
+            LEFT JOIN users ON guildusers.userId = users.id
+            WHERE guildId = ?
+            `,
+            [guildId]
+        )
+    }
+
 }
 
 module.exports = GuildUserRepo;

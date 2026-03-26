@@ -1,43 +1,43 @@
-//TODO: Command to list nicknames of current user
-const { SlashCommandBuilder } = require('@discordjs/builders')
-
-// TODO: SET UP GuildSync Logic
+// commands/mynicknames.js
+const { SlashCommandBuilder } = require('@discordjs/builders');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('mynicknames')
         .setDescription('Displays current nicknames you have set.'),
-    async execute(interaction,client){
-        console.log(`User ${interaction.user.username} : ${interaction.user.id} sent /mynicknames`)
 
-        let user = await client.userRepo.getById(interaction.user.id)
-        console.log(`${interaction.user.username} guild sync: ${user.guildsync}`)
+    async execute(interaction, client) {
+        client.logger?.info?.(`User ${interaction.user.username} : ${interaction.user.id} sent /mynicknames`);
 
-        let guildUser = await client.guildUserRepo.getGuildUser(interaction.user.id, interaction.guildId)
-        if(guildUser){
-            //User is Opted In:
-            let nicknameString = `We have the following nicknames on record for \*\*${interaction.user.username}\*\*:\n\n`
-            let nicknames = await client.guildUserNicknameRepo.getGuildUserNicknames(guildUser.id)
-
-            if(nicknames.length > 0){ //Has nicknames:
-                nicknames.forEach((nickname)=>{
-                    nicknameString += `- ${nickname.nickname}\n`
-                })
-
-                await interaction.reply({
-                    content: nicknameString
-                })
-
-            } else { //Does not have nicknames:
-                await interaction.reply({
-                    content: `There are no nicknames on record for \*\*${interaction.user.username}\*\*. Use \`/setnicknames\` to set a list.`
-                })
-            }
-        } else {
-            //User is not Opted In:
-            await interaction.reply({
-                content: `User ${interaction.user.username} is not opted in. Type \`/optin\` to set nicknames.`
-            })
+        const user = await client.repos.userRepo.getById(interaction.user.id);
+        if (user) {
+            client.logger?.info?.(`${interaction.user.username} guild sync: ${user.guildsync}`);
         }
-    }
-}
+
+        const guildUser = await client.repos.guildUserRepo.getGuildUser(interaction.user.id, interaction.guildId);
+
+        if (!guildUser) {
+            await interaction.reply({
+                content: `User ${interaction.user.username} is not opted in. Type \`/optin\` to set nicknames.`,
+                ephemeral: true,
+            });
+            return;
+        }
+
+        const nicknames = await client.repos.guildUserNicknameRepo.getGuildUserNicknames(guildUser.id);
+
+        if (!nicknames || nicknames.length === 0) {
+            await interaction.reply({
+                content: `There are no nicknames on record for **${interaction.user.username}**. Use \`/addnicknames\` to set a list.`,
+                ephemeral: true,
+            });
+            return;
+        }
+
+        const list = nicknames.map(n => `- ${n.nickname}`).join('\n');
+        await interaction.reply({
+            content: `We have the following nicknames on record for **${interaction.user.username}**:\n\n${list}`,
+            ephemeral: true,
+        });
+    },
+};

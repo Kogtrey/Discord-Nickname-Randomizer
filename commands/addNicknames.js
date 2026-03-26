@@ -1,71 +1,67 @@
-const { SlashCommandBuilder } = require('@discordjs/builders')
-
-// TODO: SET UP GuildSync Logic
+const { SlashCommandBuilder } = require('@discordjs/builders');
 
 module.exports = {
-        data: new SlashCommandBuilder()
-            .setName('addnicknames')
-            .setDescription('Adds to the list of your nicknames that the bot will randomly select from.'),
-    async execute(interaction,client){
-        console.log(`User ${interaction.user.username} : ${interaction.user.id} at guild ${interaction.guildId} sent /addnicknames`)
-        let user = await client.userRepo.getById(interaction.user.id)
-        console.log(`${user.name} guild sync: ${user.guildsync}`)
-        
-        let guildUser = await client.guildUserRepo.getGuildUser(interaction.user.id, interaction.guildId)
-        //console.log(guildUser)
-        if(guildUser){
-            //Request a comma separated list of nicknames:
+    data: new SlashCommandBuilder()
+        .setName('addnicknames')
+        .setDescription('Adds to the list of your nicknames that the bot will randomly select from.'),
+
+    async execute(interaction, client) {
+        client.logger?.info?.(
+            `User ${interaction.user.username}:${interaction.user.id} guild=${interaction.guildId} sent /addnicknames`
+        );
+
+        const user = await client.repos.userRepo.getById(interaction.user.id);
+        if (user) client.logger?.info?.(`${user.name} guild sync: ${user.guildsync}`);
+
+        const guildUser = await client.repos.guildUserRepo.getGuildUser(interaction.user.id, interaction.guildId);
+        if (!guildUser) {
             await interaction.reply({
-                content: `Check your direct messages for instructions.`
-            })
-
-            const message = await interaction.user.send({
-                content: `Please send a message with nicknames in a comma separated list. For example, an acceptable list for me would be:
-
-                \`Discman-Nickerbacker-Challenger,DooDoo-Niceboi-Chipset,DillyDally-Nifty-Cartoon\`
-                
-                \*\*Do:\*\*
-                - Use appropriate names that follow server rules
-                - Use funny names that will make you and others laugh
-                
-                \*\*Don't:\*\*
-                - Don't use names with symbols in them or anything other than text (dashes (-) and underscores (_) are okay. Use discretion).
-                `
-            })
-
-            const filter = m => m.author.id === interaction.user.id
-
-            message.channel.awaitMessages({filter, max: 1, time: 600_000})
-                .then( async (collected) => {
-                    let list = collected.first().content.replace(/\s*,\s*/g, ",").split(',')
-                    list.forEach(async nickname => {
-
-                        let existingNickname = await client.nicknameRepo.getExistingNickname(nickname,interaction.user.id)
-
-                        if(existingNickname){
-                            client.guildUserNicknameRepo.create(existingNickname.id,guildUser.id)
-                            console.log(`${interaction.user.username}:${interaction.user.id} at guild ${interaction.guildId} re-added an existing nickname.`)
-                        } else {
-                            let createdNickname = await client.nicknameRepo.create(nickname,interaction.user.id)
-                            client.guildUserNicknameRepo.create(createdNickname.id,guildUser.id)
-                        }
-                    });
-
-                    await interaction.user.send(`Nicknames list has been set! No further action required.`)
-                    console.log(`${interaction.user.username} added ${list.length} nicknames`)
-                })
-                .catch( async (collection) =>{
-                    console.log(collection)
-                    await interaction.user.send({
-                        content: `Something went wrong. Try again or contact a developer.`
-                    })
-                })
-
-        } else {
-            await interaction.reply({
-                content: `User ${interaction.user.username} is not opted in on this server. Type \`/optin\` to set nicknames.`
-            })
+                content: `User ${interaction.user.username} is not opted in on this server. Type \`/optin\` to set nicknames.`,
+                ephemeral: true,
+            });
+            return;
         }
 
-    }
-}
+        await interaction.reply({ content: `Check your direct messages for instructions.`, ephemeral: true });
+
+        const prompt = await interaction.user.send({
+            content:
+                `Please send a message with nicknames in a comma separated list. For example:\n\n` +
+                `\`Discman-Nickerbacker-Challenger,DooDoo-Niceboi-Chipset,DillyDally-Nifty-Cartoon\`\n\n` +
+                `**Do:**\n` +
+                `- Use appropriate names that follow server rules\n` +
+                `- Use funny names that will make you and others laugh\n\n` +
+                `**Don't:**\n` +
+                `- Don't use names with symbols in them or anything other than text (dashes (-) and underscores (_) are okay).\n`,
+        });
+
+        const filter = (m) => m.author.id === interaction.user.id;
+
+        prompt.channel
+            .awaitMessages({ filter, max: 1, time: 600_000, errors: ['time'] })
+            .then(async (collected) => {
+                const raw = collected.first().content;
+                const list = raw.replace(/\s*,\s*/g, ',').split(',').map(s => s.trim()).filter(Boolean);
+
+                for (const nickname of list) {
+                    const existingNickname = await client.repos.nicknameRepo.getExistingNickname(
+                        nickname,
+                        interaction.user.id
+                    );
+
+                    if (existingNickname) {
+                        await client.repos.guildUserNicknameRepo.create(existingNickname.id, guildUser.id);
+                    } else {
+                        const created = await client.repos.nicknameRepo.create(nickname, interaction.user.id);
+                        await client.repos.guildUserNicknameRepo.create(created.id, guildUser.id);
+                    }
+                }
+
+                await interaction.user.send(`Nicknames have been added. No further action required.`);
+                client.logger?.info?.(`${interaction.user.username} added ${list.length} nicknames`);
+            })
+            .catch(async () => {
+                await interaction.user.send(`Timed out or failed. Try again or contact a developer.`);
+            });
+    },
+};

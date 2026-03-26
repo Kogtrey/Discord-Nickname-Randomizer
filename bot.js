@@ -1,104 +1,96 @@
-//Database Dependencies:
-const Promise = require('bluebird');
+// bot.js
+const { Intents } = require('discord.js');
+const config = require('./config.json');
+
+const AppClient = require('./client/AppClient');
+const logger = require('./util/logger');
+
 const DBM = require('./data/dbmanager');
 const UserRepo = require('./data/Tables/UserRepo');
 const NicknameRepo = require('./data/Tables/NicknameRepo');
 const GuildUserRepo = require('./data/Tables/GuildUserRepo');
-const GuildUserNickname = require('./data/Tables/GuildUserNicknameRepo');
-const { resolve } = require('bluebird');
+const GuildUserNicknameRepo = require('./data/Tables/GuildUserNicknameRepo');
 
-//Discord Dependencies:
-const fs = require('fs');
-const Discord = require('discord.js');
-const Client = require('./client/Client.js');
-const config = require('./config.json');
-const { MessageEmbed } = require('discord.js');
-global.AbortController = require('node-abort-controller').AbortController;
+const { loadCommands } = require('./handlers/commandLoader');
+const { registerInteractionHandler } = require('./handlers/interactionHandler');
+const { onReady } = require('./handlers/readyHandler');
 
-//Other Dependencies:
-const Cron = require('cron');
-const { Console } = require('console');
-const commandmanager = require('./commandmanager')
+const { DiscordMemberService } = require('./services/DiscordMemberService');
+const { NicknameRotationService } = require('./services/NicknameRotationService');
+const { ActivityService } = require('./services/ActivityService');
 
-//Initializations:
-const client = new Client();
-
-client.commands = new Discord.Collection();
-const commandfiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
-
-for (const file of commandfiles) {
-    const command = require(`./commands/${file}`);
-    client.commands.set(command.data.name, command);
-}
-
-commandmanager.deploycommands(client)
-
-
-client.once('ready', async () => {
-    client.userRepo.createTable();
-    client.nicknameRepo.createTable();
-    client.guildUserRepo.createTable();
-    client.guildUserNicknameRepo.createTable();
-
-
-    let scheduledNicknameChange = new Cron.CronJob('0 0 */3 * *', async () =>{
-        
-        let guilds = await client.guilds.fetch()
-        
-        guilds.each(guild=>{
-            // Filter users by guild
-        })
-
-        let users = await client.userRepo.getAll()
-        //For each opted user:
-        users.forEach( async (user) => {
-            
-            let member = await guild.members.fetch(`${user.id}`)
-
-            let nicknames = await client.nicknameRepo.getNicknames(user.id)
-
-            //If there are stored nicknames, pick a random one. Else, do nothing:
-            if(nicknames.length > 0){
-                let oldnickname = member.nickname
-                let newnickname = nicknames[Math.floor(Math.random()*nicknames.length)].nickname
-                while(oldnickname === newnickname){
-                    newnickname = nicknames[Math.floor(Math.random()*nicknames.length)].nickname
-                }
-                await member.setNickname(newnickname)
-                console.log(`Changed nickname for ${user.name} : ${user.id} to ${newnickname} (Originally ${oldnickname})`)
-            } else {
-                console.log(`User ${user.name} : ${user.id} has no nicknames to change.`)
-            }
-
-        });
-
+async function main() {
+    const dbm = new DBM('./data/db.sqlite3', {
+        busyTimeoutMs: 5000,
+        enableWAL: true,
+        synchronous: 'NORMAL',
     });
 
-	console.log('Ready!');
-    client.user.setActivity('Kloggers sleep. Zzzzz', { type: 'WATCHING' });
+    const repos = {
+        userRepo: new UserRepo(dbm),
+        nicknameRepo: new NicknameRepo(dbm),
+        guildUserRepo: new GuildUserRepo(dbm),
+        guildUserNicknameRepo: new GuildUserNicknameRepo(dbm),
+    };
 
-    scheduledNicknameChange.start()
+    const client = new AppClient({
+        intents: [
+            Intents.FLAGS.GUILDS,
+            Intents.FLAGS.GUILD_MEMBERS,
+            Intents.FLAGS.GUILD_MESSAGES,
+            Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+            Intents.FLAGS.DIRECT_MESSAGES,
+            Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
+            Intents.FLAGS.GUILD_VOICE_STATES,
+        ],
+        partials: ['CHANNEL'], // DM support in v13
+        config,
+        repos,
+        services: {},
+        logger,
+    });
+
+    // Services
+    const discordMemberService = new DiscordMemberService({ logger });
+    const nicknameRotationService = new NicknameRotationService({ repos, discordMemberService, logger });
+    const activityService = new ActivityService({ client, repos, config, logger });
+
+    client.services.discordMemberService = discordMemberService;
+    client.services.nicknameRotationService = nicknameRotationService;
+    client.services.activityService = activityService;
+
+    // Handlers
+    loadCommands(client);
+    registerInteractionHandler(client);
+    client.once('ready', () => onReady(client));
+
+    await client.login(config.token);
+
+    process.on('SIGINT', async () => {
+        logger.info('SIGINT received, shutting down...');
+        try { await client.destroy(); } catch { }
+        try { await dbm.close(); } catch { }
+        process.exit(0);
+    });
+
+    process.on('SIGTERM', async () => {
+        logger.info('SIGTERM received, shutting down...');
+        try { await client.destroy(); } catch { }
+        try { await dbm.close(); } catch { }
+        process.exit(0);
+    });
+
+    process.on('unhandledRejection', (reason)=> {
+        logger.error({reason}, 'Unhandled Promise Rejection');
+    })
+
+    process.on('uncaughtException', (err) => {
+        logger.fatal({err}, 'Uncaught Exception');
+        process.exit(1);
+    });
+}
+
+main().catch((err) => {
+    logger.error('Fatal startup error:', err);
+    process.exit(1);
 });
-
-client.on('interactionCreate', async interaction => {
-	if (!interaction.isCommand()) return;
-
-	const command = client.commands.get(interaction.commandName);
-
-    if (!command) return;
-    
-    try {
-        command.execute(interaction, client);
-    
-    } catch (error) {
-        console.error(error);
-        interaction.followUp({
-            content: 'There was an error trying to execute that command!',
-            ephemeral: true,
-        });
-    }
-    
-});
-
-
-client.login(config.token);

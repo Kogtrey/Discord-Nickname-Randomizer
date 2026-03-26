@@ -1,66 +1,99 @@
-const sqlite3 = require('sqlite3')
-const Promise = require('bluebird')
+// data/dbmanager.js
+const sqlite3 = require('sqlite3');
+const Promise = require('bluebird');
 
 class DBM {
-    //Opens connection to database at specified path:
-    constructor(dbFilePath) {
+    constructor(dbFilePath, options = {}) {
+        const {
+            busyTimeoutMs = 5000,
+            enableWAL = true,
+            synchronous = 'NORMAL', // NORMAL is common with WAL
+        } = options;
+
         this.db = new sqlite3.Database(dbFilePath, (err) => {
             if (err) {
-                console.log('Could not connect to database', err)
-            } else {
-                console.log('Connected to database')
-                this.db.get("PRAGMA foreign_keys = ON")
+                console.error('Could not connect to database', err);
+                return;
             }
-        })
+
+            console.log('Connected to database');
+
+            // Apply PRAGMAs serially.
+            // Note: sqlite3's exec runs all statements.
+            const pragmas = [
+                'PRAGMA foreign_keys = ON;',
+                `PRAGMA busy_timeout = ${busyTimeoutMs};`,
+                ...(enableWAL ? ['PRAGMA journal_mode = WAL;'] : []),
+                `PRAGMA synchronous = ${synchronous};`,
+            ].join('\n');
+
+            this.db.exec(pragmas, (pragmaErr) => {
+                if (pragmaErr) console.error('Failed applying PRAGMAs', pragmaErr);
+            });
+        });
     }
 
-    //Database Schema Management (Table Creation, Deletion, Updates, etc.):
-    //(Wrapper for sqlite3.db.run)
     run(sql, params = []) {
         return new Promise((resolve, reject) => {
             this.db.run(sql, params, function (err) {
                 if (err) {
-                    console.log('Error running sql' + sql)
-                    console.log(err)
-                    reject(err)
+                    console.error('Error running sql:', sql);
+                    console.error(err);
+                    reject(err);
                 } else {
-                    resolve({ id: this.lastID })
+                    resolve({ id: this.lastID, changes: this.changes });
                 }
-            })
-        })
+            });
+        });
     }
 
-    //Executes given SQL Queries on tables:
-    //(Wrapper for sqlite3.db.get)
     get(sql, params = []) {
         return new Promise((resolve, reject) => {
             this.db.get(sql, params, (err, result) => {
                 if (err) {
-                    console.log('Error running sql: ' + sql)
-                    console.log(err)
-                    reject(err)
+                    console.error('Error running sql:', sql);
+                    console.error(err);
+                    reject(err);
                 } else {
-                    resolve(result)
+                    resolve(result);
                 }
-            })
-        })
+            });
+        });
     }
 
-    //Executes given SQL to get all rows of a table from:
-    //(Wrapper for sqlite3.db.all)
     all(sql, params = []) {
         return new Promise((resolve, reject) => {
             this.db.all(sql, params, (err, rows) => {
                 if (err) {
-                    console.log('Error running sql: ' + sql)
-                    console.log(err)
-                    reject(err)
+                    console.error('Error running sql:', sql);
+                    console.error(err);
+                    reject(err);
                 } else {
-                    resolve(rows)
+                    resolve(rows);
                 }
-            })
-        })
+            });
+        });
+    }
+
+    exec(sql) {
+        return new Promise((resolve, reject) => {
+            this.db.exec(sql, (err) => {
+                if (err) {
+                    console.error('Error exec sql:', sql);
+                    console.error(err);
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        });
+    }
+
+    close() {
+        return new Promise((resolve, reject) => {
+            this.db.close((err) => (err ? reject(err) : resolve()));
+        });
     }
 }
 
-module.exports = DBM
+module.exports = DBM;

@@ -32,7 +32,7 @@ class GuildUserNicknameRepo {
         const { id, nicknameId, guilduserId} = GuildUserNickname
         return this.dbm.run(
             `
-            UDPATE guildusernicknames
+            UPDATE guildusernicknames
             SET nicknameId = ?,
                 guilduserId = ?
             WHERE id = ?

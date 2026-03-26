@@ -1,38 +1,37 @@
-//TODO: Command to remove nicknames for given user.
-//TODO: Command to list nicknames of current user
-const { SlashCommandBuilder } = require('@discordjs/builders')
-
-// TODO: SET UP GuildSync Logic
+const { SlashCommandBuilder } = require('@discordjs/builders');
 
 module.exports = {
-        data: new SlashCommandBuilder()
-            .setName('resetnicknames')
-            .setDescription('Removes all of your current set nicknames.'),
-    async execute(interaction,client){
-        console.log(`User ${interaction.user.username} : ${interaction.user.id} sent /resetnicknames`)
-        let user = await client.userRepo.getById(interaction.user.id)
-        console.log(`${user.name} guild sync: ${user.guildsync}`)
+    data: new SlashCommandBuilder()
+        .setName('resetnicknames')
+        .setDescription('Removes all of your current set nicknames.'),
 
-        let guildUser = await client.guildUserRepo.getGuildUser(interaction.user.id, interaction.guildId)
+    async execute(interaction, client) {
+        client.logger?.info?.(`User ${interaction.user.username}:${interaction.user.id} sent /resetnicknames`);
 
-        if(guildUser){//User is Opted In:
-            //Remove nicknames associated to user:
-            let guildUserNicknames = await client.guildUserNicknameRepo.getGuildUserNicknames(guildUser.id)
-            guildUserNicknames.forEach(guildUserNickname => {
-                client.guildUserNicknameRepo.delete(guildUserNickname.id)
+        const user = await client.repos.userRepo.getById(interaction.user.id);
+        if (user) client.logger?.info?.(`${user.name} guild sync: ${user.guildsync}`);
+
+        const guildUser = await client.repos.guildUserRepo.getGuildUser(interaction.user.id, interaction.guildId);
+
+        if (!guildUser) {
+            await interaction.reply({
+                content: `User ${interaction.user.username} is not opted in. Type \`/optin\` to set nicknames.`,
+                ephemeral: true,
             });
-
-            await interaction.reply({
-                content: `Your nicknames have been removed. To add nicknames again, type \`/setnicknames\`.`
-            })
-
-            console.log(`Removed nicknames for User ${interaction.user.username}`)
-
-        } else {
-            //User is not Opted In:
-            await interaction.reply({
-                content: `User ${interaction.user.username} is not opted in. Type \`/optin\` to set nicknames.`
-            })
+            return;
         }
-    }
-}
+
+        const guildUserNicknames = await client.repos.guildUserNicknameRepo.getGuildUserNicknames(guildUser.id);
+
+        for (const row of guildUserNicknames) {
+            await client.repos.guildUserNicknameRepo.delete(row.id);
+        }
+
+        await interaction.reply({
+            content: `Your nicknames have been removed. To add nicknames again, type \`/addnicknames\`.`,
+            ephemeral: true,
+        });
+
+        client.logger?.info?.(`Removed nicknames for userId=${interaction.user.id} guild=${interaction.guildId}`);
+    },
+};
