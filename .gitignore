@@ -7,7 +7,6 @@ node_modules/
 # Config / secrets
 ###############################################################################
 config.json
-config.*.json
 .env
 .env.*
 *.pem

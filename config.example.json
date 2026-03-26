@@ -1,0 +1,13 @@
+{
+    "clientId": "PUT_CLIENT_ID_HERE",
+    "token": "PUT_BOT_TOKEN_HERE",
+    "jobs": {
+        "timezone": "America/Denver",
+        "nicknameRotationCron": "0 0 */1 * *",
+        "workActivityCron": "0 6 * * *",
+        "sleepActivityCron": "0 20 * * *"
+    },
+    "activity": {
+        "nicknameSourceUserId": "PUT_USER_ID_HERE"
+    }
+}
